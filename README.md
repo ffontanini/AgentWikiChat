@@ -6,7 +6,7 @@
 
 **AgentWikiChat** es un agente conversacional inteligente multi-provider basado en .NET 9 que implementa el patrón **ReAct (Reasoning + Acting)** con soporte completo para **Tool Calling**. Permite interactuar con múltiples proveedores de IA y ejecutar herramientas especializadas de forma autónoma.
 
----
+----
 
 ## ✨ Características Principales
 
