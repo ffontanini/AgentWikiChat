@@ -58,7 +58,7 @@ public class SvnVersionControlHandler : BaseVersionControlHandler
         // Diagnóstico inicial
         if (_svnInstalled == true)
         {
-            _ = TestConnectionAsync(); // Fire and forget para no bloquear
+            _ = TestConnectionAsync().Result; // Fire and forget para no bloquear
         }
     }
 

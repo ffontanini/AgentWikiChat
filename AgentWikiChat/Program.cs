@@ -73,6 +73,9 @@ try
 
     // Handlers con soporte de Tools
     services.AddSingleton<IToolHandler, WikipediaHandler>();  // Expone 2 tools: search + article
+    services.AddSingleton<IToolHandler>(sp => new RAGToolHandler(
+        sp.GetRequiredService<IConfiguration>(),
+        sp.GetRequiredService<IHttpClientFactory>()));
     services.AddSingleton<IToolHandler, RAGToolHandler>();     // Para RAG general (futuro)
     services.AddSingleton<IToolHandler>(sp => new DatabaseToolHandler(sp.GetRequiredService<IConfiguration>()));
     services.AddSingleton<IToolHandler>(sp => new RepositoryToolHandler(sp.GetRequiredService<IConfiguration>()));

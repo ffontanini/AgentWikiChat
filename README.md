@@ -2,11 +2,9 @@
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.5.0-green.svg)](https://github.com/tonio2024/AgentWikiChat)
+[![Version](https://img.shields.io/badge/version-3.6.0-green.svg)](https://github.com/fernandobequir/AgentWikiChat)
 
 AgentWikiChat es un agente conversacional inteligente multi-provider basado en .NET 9 que implementa el patrón ReAct (Reasoning + Acting) con soporte completo para Tool Calling. Permite interactuar con múltiples proveedores de IA y ejecutar herramientas especializadas de forma autónoma (Wikipedia, Bases de Datos, Repositorios SVN/Git/GitHub), manteniendo memoria de la sesión y logs persistentes.
-
-🎉 NUEVO en v3.5.0: Arquitectura genérica de control de versiones con soporte para SVN, Git y GitHub (API).
 
 ---
 
@@ -49,7 +47,7 @@ AgentWikiChat es un agente conversacional inteligente multi-provider basado en .
 1) Clonar el repositorio
 
 ```bash
-git clone https://github.com/tonio2024/AgentWikiChat.git
+git clone https://github.com/fernandobequir/AgentWikiChat.git
 cd AgentWikiChat
 ```
 
