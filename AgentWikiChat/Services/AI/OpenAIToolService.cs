@@ -96,7 +96,7 @@ public class OpenAIToolService : IToolCallingService
             MaxTokens = _maxTokens
         };
 
-        var response = await _httpClient.PostAsJsonAsync("/chat/completions", request, cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync("v1/chat/completions", request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -200,9 +200,12 @@ internal class OpenAIChatRequest
     public List<OpenAITool>? Tools { get; set; }
 
     [JsonPropertyName("temperature")]
+    [JsonIgnore]
     public double Temperature { get; set; }
+    [JsonIgnore]
 
     [JsonPropertyName("max_tokens")]
+
     public int MaxTokens { get; set; }
 }
 
@@ -215,6 +218,7 @@ internal class OpenAIMessage
     public string? Content { get; set; }
 
     [JsonPropertyName("tool_calls")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<OpenAIToolCall>? ToolCalls { get; set; }
 }
 
@@ -260,6 +264,7 @@ internal class OpenAIProperty
     public string Description { get; set; } = string.Empty;
 
     [JsonPropertyName("enum")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Enum { get; set; }
 }
 
