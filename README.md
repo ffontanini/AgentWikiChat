@@ -2,73 +2,68 @@
 
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.5.0-green.svg)](https://github.com/ffontanini/AgentWikiChat)
+[![Version](https://img.shields.io/badge/version-3.5.0-green.svg)](https://github.com/tonio2024/AgentWikiChat)
 
-**AgentWikiChat** es un agente conversacional inteligente multi-provider basado en .NET 9 que implementa el patrón **ReAct (Reasoning + Acting)** con soporte completo para **Tool Calling**. Permite interactuar con múltiples proveedores de IA y ejecutar herramientas especializadas de forma autónoma.
+AgentWikiChat es un agente conversacional inteligente multi-provider basado en .NET 9 que implementa el patrón ReAct (Reasoning + Acting) con soporte completo para Tool Calling. Permite interactuar con múltiples proveedores de IA y ejecutar herramientas especializadas de forma autónoma (Wikipedia, Bases de Datos, Repositorios SVN/Git/GitHub), manteniendo memoria de la sesión y logs persistentes.
 
-**🎉 NUEVO en v3.5.0**: Arquitectura genérica de control de versiones con soporte para SVN y Git.
+🎉 NUEVO en v3.5.0: Arquitectura genérica de control de versiones con soporte para SVN, Git y GitHub (API).
 
-----
+---
 
 ## ✨ Características Principales
 
-- 🧠 **Patrón ReAct**: Razonamiento paso a paso con múltiples herramientas
-- 🔄 **Multi-Provider AI**: Soporte para Ollama, OpenAI, LM Studio y Anthropic Claude
-- 🛠️ **Tool Calling Unificado**: Formato estándar compatible con todos los proveedores
-- 🗄️ **Multi-Database**: SQL Server y PostgreSQL con misma interfaz
-- 📚 **Wikipedia Integration**: Búsqueda y obtención de artículos
-- 📦 **SVN Repository**: Consultas de solo lectura a repositorios Subversion
-- 🔒 **Seguridad**: Solo consultas SELECT de lectura en bases de datos y operaciones de lectura en SVN
-- 💾 **Session Logging**: Guarda conversaciones automáticamente
-- 🎯 **Memoria Modular**: Contexto global + contexto por módulo
-- 🔍 **Debug Mode**: Visualización detallada del proceso de razonamiento
-- ⚡ **Detección de Loops**: Previene invocaciones repetidas inútiles
+- 🧠 ReAct Pattern: razonamiento paso a paso con múltiples herramientas
+- 🔄 Multi-Provider IA: Ollama, OpenAI, LM Studio, Anthropic y Gemini
+- 🛠️ Tool Calling Unificado: formato estándar compatible con todos los proveedores
+- 🗄️ Multi-Database: SQL Server y PostgreSQL mediante la misma interfaz
+- 📚 Wikipedia Integration: búsqueda y obtención de artículos
+- 📦 Repositorios: SVN, Git y GitHub (REST API) modo solo lectura
+- 🔒 Seguridad: solo SELECT en BD y solo lectura en repositorios
+- 💾 Session Logging: guarda conversaciones automáticamente en `Logs/Sessions`
+- 🎯 Memoria Modular: contexto global + contexto por módulo
+- 🔍 Debug Mode y métricas: visualización del proceso y prevención de loops
 
 ---
 
 ## 🎯 Casos de Uso
 
-- 💬 **Chatbot Inteligente** con acceso a datos estructurados
-- 📊 **Análisis de Datos** mediante consultas SQL naturales
-- 🔍 **Búsqueda de Información** enciclopédica (Wikipedia)
-- 📦 **Consulta de Repositorios** SVN con búsqueda de historial y código
-- 🧪 **Investigación Multi-Paso** usando varias herramientas en secuencia
-- 📈 **Reportes Automáticos** desde bases de datos
-- 🎓 **Asistente de Aprendizaje** con contexto conversacional
-- 👨‍💻 **Auditoría de Código** y análisis de autoría en repositorios
+- 💬 Chatbot con acceso a datos estructurados
+- 📊 Análisis y reportes con consultas SQL seguras
+- 🔍 Búsqueda enciclopédica (Wikipedia)
+- 📦 Auditoría de repositorios (historial, blame, diffs)
+- 🧪 Investigación multi-paso combinando herramientas (ReAct)
 
 ---
 
 ## 🚀 Inicio Rápido
 
-### Prerequisitos
+### Prerrequisitos
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- SQL Server o PostgreSQL (opcional, para la herramienta de base de datos)
-- Cliente SVN (opcional, para la herramienta de repositorio)
-- Uno de los siguientes proveedores de IA:
-  - [Ollama](https://ollama.ai/) (local, gratis)
-  - [LM Studio](https://lmstudio.ai/) (local, gratis)
-  - OpenAI API Key
-  - Anthropic API Key
+- .NET 9 SDK
+- (Opcional) SQL Server o PostgreSQL
+- (Opcional) Cliente SVN o Git instalado (para handlers locales)
+- Uno de los siguientes proveedores IA: Ollama/LM Studio (local), OpenAI, Anthropic o Gemini
 
 ### Instalación
 
-1. **Clonar el repositorio**
+1) Clonar el repositorio
+
 ```bash
-git clone https://github.com/yourusername/AgentWikiChat.git
+git clone https://github.com/tonio2024/AgentWikiChat.git
 cd AgentWikiChat
 ```
 
-2. **Restaurar dependencias**
+2) Restaurar dependencias
+
 ```bash
 cd AgentWikiChat
 dotnet restore
 ```
 
-3. **Configurar el proveedor de IA**
+3) Configurar proveedores en `appsettings.json`
 
-Editar `appsettings.json`:
+- IA (estructura actual con ActiveProvider + Providers):
+
 ```json
 {
   "AI": {
@@ -80,57 +75,86 @@ Editar `appsettings.json`:
         "BaseUrl": "http://localhost:1234",
         "Model": "meta-llama-3-8b-instruct",
         "Temperature": 0.7,
-        "MaxTokens": 2048
+        "MaxTokens": 2048,
+        "TimeoutSeconds": 300
       }
     ]
   }
 }
 ```
 
-4. **Configurar base de datos** (opcional)
+- Base de Datos (multi-provider):
 
 ```json
 {
   "Database": {
-    "Provider": "SqlServer",
-    "ConnectionString": "Server=localhost;Database=MyDB;Integrated Security=True;",
-    "MaxRowsToReturn": 100
+    "ActiveProvider": "SqlServer-Development",
+    "Providers": [
+      {
+        "Name": "SqlServer-Development",
+        "Type": "SqlServer",
+        "ConnectionString": "Server=localhost;Database=DevDB;Integrated Security=True;TrustServerCertificate=True;",
+        "CommandTimeout": 60,
+        "MaxRowsToReturn": 1000,
+        "EnableQueryLogging": true
+      },
+      {
+        "Name": "PostgreSQL-Local",
+        "Type": "PostgreSQL",
+        "ConnectionString": "Host=localhost;Port=5432;Database=testdb;Username=dev;Password=dev123;",
+        "CommandTimeout": 60,
+        "MaxRowsToReturn": 500,
+        "EnableQueryLogging": true
+      }
+    ]
   }
 }
 ```
 
-5. **Configurar SVN** (opcional)
+- Repositorios (SVN/Git/GitHub) vía arquitectura unificada:
 
 ```json
 {
-  "SVN": {
-    "Provider": "SVN",
-    "RepositoryUrl": "https://svn.company.com/repos/project",
-    "Username": "myuser",
-    "Password": "mypassword",
-    "WorkingCopyPath": "",
-    "CommandTimeout": 60,
-    "EnableLogging": true
+  "Repository": {
+    "ActiveProvider": "GitHub-AgentWikiChat",
+    "Providers": [
+      {
+        "Name": "GitHub-AgentWikiChat",
+        "Type": "GitHub",
+        "RepositoryUrl": "https://github.com/owner/repo",
+        "Username": "your-github-username",
+        "Password": "ghp_your_token",
+        "WorkingCopyPath": "",
+        "CommandTimeout": 60,
+        "EnableLogging": true
+      },
+      {
+        "Name": "SVN-TestRepo",
+        "Type": "SVN",
+        "RepositoryUrl": "https://svn.server.com/repos/project",
+        "Username": "user",
+        "Password": "pass",
+        "WorkingCopyPath": "C:\\Projects\\MySvnWorkingCopy",
+        "CommandTimeout": 60,
+        "EnableLogging": true
+      },
+      {
+        "Name": "Git-LocalProject",
+        "Type": "Git",
+        "RepositoryUrl": "",
+        "Username": "",
+        "Password": "",
+        "WorkingCopyPath": "C:\\Projects\\MyLocalGitRepo",
+        "CommandTimeout": 60,
+        "EnableLogging": true
+      }
+    ]
   }
 }
 ```
 
-**Parámetros:**
-- **`Provider`**: Tipo de control de versiones ("SVN", "Git", etc.)
-- **`RepositoryUrl`**: URL del repositorio SVN (HTTP, HTTPS, SVN, FILE protocols)
-- **`Username`**: Usuario para autenticación (opcional si el repo es público)
-- **`Password`**: Contraseña para autenticación
-- **`WorkingCopyPath`**: Ruta local de working copy para operación `status` (opcional)
-- **`CommandTimeout`**: Timeout en segundos para operaciones SVN
-- **`EnableLogging`**: Habilita logging detallado de operaciones
+4) Ejecutar
 
-**Ejemplos de URL:**
-- HTTP: `http://svn.company.com/repos/project`
-- HTTPS: `https://svn.secure.com/repos/project`
-- SVN: `svn://svn.company.com/repos/project`
-- FILE: `file:///C:/SVNRepos/project`
-
-6. **Ejecutar**
 ```bash
 dotnet run
 ```
@@ -139,250 +163,111 @@ dotnet run
 
 ## 📖 Uso
 
-### Comandos Disponibles
+### Comandos de la consola
 
-| Comando | Descripción |
-|---------|-------------|
-| `/salir` | Finalizar la aplicación |
-| `/memoria` | Ver estado de la memoria conversacional |
-| `/limpiar` | Limpiar memoria y reiniciar contexto |
-| `/tools` | Listar herramientas disponibles |
-| `/config` | Ver configuración del agente |
-| `/debug` | Alternar modo debug |
+- `/salir` – Finaliza la aplicación
+- `/memoria` – Muestra el estado de la memoria conversacional
+- `/limpiar` – Limpia la memoria y restablece el system prompt
+- `/tools` – Lista herramientas disponibles registradas
+- `/config` – Muestra configuración activa del agente
+- `/debug` – Alterna modo debug
 
-### Ejemplos de Consultas
+### Ejemplos de consultas
 
-**Wikipedia:**
-```
-👤 Tú> busca información sobre inteligencia artificial
-```
+Wikipedia:
+- "busca información sobre inteligencia artificial"
 
-**Base de Datos (SQL Server):**
-```
-👤 Tú> ¿cuántos usuarios hay en la base de datos?
-👤 Tú> muéstrame las últimas 10 ventas
-```
+Base de Datos:
+- "¿cuántos usuarios hay en la base de datos?"
+- "muéstrame las últimas 10 ventas"
 
-**Base de Datos (PostgreSQL):**
-```
-👤 Tú> dame los 5 productos más caros
-👤 Tú> lista todas las tablas disponibles
-```
+SVN/Git/GitHub:
+- "muestra los últimos 5 commits del repositorio"
+- "¿quién modificó el archivo Main.cs?"
+- "lista los archivos en src/"
 
-**SVN Repository:**
-```
-👤 Tú> muéstrame los últimos 5 commits del repositorio
-👤 Tú> ¿quién modificó el archivo Main.cs?
-👤 Tú> lista los archivos en /trunk/src
-👤 Tú> muestra el contenido del archivo README.md
-```
-
-**Multi-Step (ReAct):**
-```
-👤 Tú> busca información sobre C# en Wikipedia y luego cuéntame cuántos proyectos en C# tenemos en la BD
-👤 Tú> dame los últimos commits y busca información sobre el autor principal en Wikipedia
-```
+ReAct (multi-paso):
+- "busca información sobre C# en Wikipedia y luego dime cuántos proyectos en C# hay en la BD"
 
 ---
 
 ## 🛠️ Herramientas Disponibles
 
-### 1. 📚 Wikipedia
-- **`search_wikipedia_titles`**: Busca títulos de artículos
-- **`get_wikipedia_article`**: Obtiene contenido completo de un artículo
+1) 📚 Wikipedia
+- `search_wikipedia_titles`: busca títulos de artículos (usar primero)
+- `get_wikipedia_article`: obtiene el contenido resumido de un artículo
 
-### 2. 🗄️ Base de Datos
-- **`query_database`**: Ejecuta consultas SELECT (solo lectura)
-- Soporta: SQL Server, PostgreSQL
-- Seguridad: Bloquea INSERT, UPDATE, DELETE, DROP, etc.
+2) 🗄️ Base de Datos (solo lectura)
+- `query_database`: ejecuta consultas SELECT (bloquea INSERT/UPDATE/DELETE, etc.)
+- Soporta: SQL Server y PostgreSQL
 
-### 3. 📦 SVN Repository
-- **`svn_operation`**: Ejecuta operaciones de solo lectura en repositorios SVN
-- Operaciones soportadas:
-  - **`log`**: Ver historial de commits
-  - **`info`**: Información del repositorio/archivo
-  - **`list`**: Listar archivos y directorios
-  - **`cat`**: Ver contenido de archivos
-  - **`diff`**: Ver diferencias entre revisiones
-  - **`blame`**: Ver autoría línea por línea
-  - **`status`**: Estado de working copy
-- Seguridad: Bloquea commit, delete, update, merge, etc.
-- Compatible con SVN 1.6+
+3) 📦 Repositorios (solo lectura)
+- `svn_operation` (SVN): `log`, `info`, `list`, `cat`, `diff`, `blame`, `status`
+- `git_operation` (Git local): `log`, `show`, `ls-tree`, `blame`, `diff`, `status`, `branch`, `tag`
+- `github_operation` (GitHub API): `log`, `show`, `list`, `cat`, `diff`, `blame`, `branches`, `tags`, `info`
 
-### 🆕 4. Git Repository (v3.5.0)
-- **`git_operation`**: Ejecuta operaciones de solo lectura en repositorios Git
-- Operaciones soportadas:
-  - **`log`**: Ver historial de commits
-  - **`show`**: Detalles de un commit específico
-  - **`ls-tree`**: Listar archivos en el árbol
-  - **`blame`**: Ver autoría línea por línea
-  - **`diff`**: Ver diferencias entre commits
-  - **`status`**: Estado del working directory
-  - **`branch`**: Listar ramas
-  - **`tag`**: Listar tags
-- Seguridad: Bloquea commit, push, pull, add, rm, etc.
-- Compatible con Git 2.0+
+---
 
-### 🆕 5. GitHub Repository (v3.5.0)
-- **`github_operation`**: Ejecuta operaciones de solo lectura en repositorios GitHub usando API REST
-- Operaciones soportadas:
-  - **`log`**: Ver historial de commits
-  - **`show`**: Detalles de un commit específico
-  - **`list`**: Listar archivos y directorios
-  - **`cat`**: Ver contenido de archivos
-  - **`diff`**: Ver diferencias en un commit
-  - **`blame`**: Ver información de autoría
-  - **`branches`**: Listar todas las ramas
-  - **`tags`**: Listar todos los tags
-  - **`info`**: Información completa del repositorio
-- Seguridad: Solo lectura, no permite push, merge, delete, etc.
-- **No requiere cliente local** - Usa GitHub API v3
-- Requiere Personal Access Token para repos privados
+## 🔧 Configuración del Agente y Logging
 
-### 🆕 Configuración de Git (v3.5.0)
-
-```json
-{
-  "Git": {
-    "Provider": "Git",
-    "RepositoryUrl": "https://github.com/user/repo.git",
-    "Username": "myuser",
-    "Password": "ghp_token_or_password",
-    "WorkingCopyPath": "C:\\Projects\\MyRepo",
-    "CommandTimeout": 60,
-    "EnableLogging": true
-  }
-}
-```
-
-**Parámetros:**
-- **`Provider`**: "Git"
-- **`RepositoryUrl`**: URL del repositorio Git (HTTPS, SSH, local)
-- **`Username`**: Usuario para autenticación (para HTTPS)
-- **`Password`**: Token de acceso personal o contraseña
-- **`WorkingCopyPath`**: Ruta local del repositorio clonado (obligatorio para Git)
-- **`CommandTimeout`**: Timeout en segundos para operaciones Git
-- **`EnableLogging`**: Habilita logging detallado de operaciones
-
-**Nota**: Para GitHub/GitLab, usa Personal Access Token en lugar de contraseña.
-
-### 🆕 Configuración de GitHub (v3.5.0)
-
-```json
-{
-  "GitHub": {
-    "Provider": "GitHub",
-    "RepositoryUrl": "https://github.com/owner/repo",
-    "Username": "your-github-username",
-    "Password": "ghp_YourPersonalAccessToken",
-    "Branch": "main",
-    "CommandTimeout": 30,
-    "EnableLogging": true
-  }
-}
-```
-
-**Parámetros:**
-- **`Provider`**: "GitHub"
-- **`RepositoryUrl`**: URL del repositorio GitHub (sin .git)
-- **`Username`**: Tu nombre de usuario de GitHub
-- **`Password`**: Personal Access Token (obligatorio, obtenerlo en: https://github.com/settings/tokens)
-- **`Branch`**: Rama predeterminada (default: "main")
-- **`CommandTimeout`**: Timeout en segundos para llamadas API
-- **`EnableLogging`**: Habilita logging detallado de operaciones
-
-**Ventajas de GitHub API:**
-- ✅ No requiere cliente local instalado
-- ✅ No requiere clonar el repositorio
-- ✅ Acceso instantáneo a cualquier repositorio
-- ✅ Funciona con repos públicos y privados
-- ✅ 5,000 requests/hora con token
-
-**Obtener Personal Access Token:**
-1. Ve a: https://github.com/settings/tokens
-2. Click en "Generate new token (classic)"
-3. Selecciona scopes: `repo` (o `public_repo` para solo públicos)
-4. Copia el token generado (comienza con `ghp_`)
-5. Úsalo en el campo `Password`
-
-**⚠️ Importante:**
-- El token es sensible, no lo compartas
-- Para repos públicos, el token es opcional (pero con límite de 60 requests/hora)
-- Guarda el token de forma segura (ej: Azure Key Vault, variables de entorno)
+- System Prompt, ReAct y loop de herramientas se configuran en `Agent` dentro de `appsettings.json` (máx. iteraciones, timeouts, duplicados consecutivos, etc.).
+- `Logging` permite activar el logging de sesión; los archivos se guardan en `Logs/Sessions` con timestamp.
+- `Ui` expone `UseEmoji` y `Debug` para la experiencia de consola.
 
 ---
 
 ## 📚 Documentación
 
-- 📐 **[Arquitectura](AgentWikiChat/Docs/ARCHITECTURE.md)** - Diseño y patrones del sistema
-- 🗄️ **[Database Tool](AgentWikiChat/Docs/SqlServerTool-README.md)** - Uso de consultas SQL
-- 📦 **[SVN Tool](AgentWikiChat/Docs/SVNTool-README.md)** - Operaciones en repositorios SVN
-- 🔍 **[SVN Troubleshooting](AgentWikiChat/Docs/SVN-TroubleshootingGuide.md)** - Solución de problemas SVN
-- 📝 **[Session Logging](AgentWikiChat/Docs/SessionLogging-README.md)** - Sistema de logging
+- Arquitectura general: `AgentWikiChat/Docs/ARCHITECTURE.md`
+- Wikipedia Tool: dentro del código `Services/Handlers/WikipediaHandler.cs`
+- Database Tool: `AgentWikiChat/Docs/SqlServerTool-README.md`
+- SVN Tool: `AgentWikiChat/Docs/SVNTool-README.md`
+- GitHub Tool: `AgentWikiChat/Docs/GitHubTool-README.md`
+- Session Logging: `AgentWikiChat/Docs/SessionLogging-README.md`
+- Multi-Database: `AgentWikiChat/Docs/MultiDatabase-Support.md`
+- Version Control (arquitectura): `AgentWikiChat/Docs/VersionControl-Architecture.md`
 
-### 🆕 v3.5.0 - Control de Versiones Genérico
-- 🏗️ **[VersionControl Architecture](AgentWikiChat/Docs/VersionControl-Architecture.md)** - Arquitectura completa
-- 📋 **[VersionControl Changelog](AgentWikiChat/Docs/VersionControl-Changelog.md)** - Changelog técnico
-- 📊 **[VersionControl Summary](AgentWikiChat/Docs/VersionControl-Summary.md)** - Resumen ejecutivo
+---
 
-## 🏗️ Arquitectura v3.5.0 - Control de Versiones Genérico
-
-```
-RepositoryToolHandler
-    │
-    └── VersionControlHandlerFactory
-            │
-            ├── IVersionControlHandler (interfaz)
-            │       │
-            │       └── BaseVersionControlHandler (base común)
-            │               │
-            │               ├── SvnVersionControlHandler
-            │               ├── GitVersionControlHandler
-            │               └── GitHubVersionControlHandler  ← 🆕 v3.5.0
-            │
-            └── Fácil extensión: GitLab, Bitbucket, Mercurial, TFS, Perforce
+## 🏗️ Estructura del Proyecto (resumen)
 
 ```
-
-**Beneficios:**
-- ✅ Arquitectura modular y extensible
-- ✅ Código reutilizable entre proveedores
-- ✅ Fácil agregar nuevos sistemas de control de versiones
-- ✅ 81% reducción en complejidad
-- ✅ **GitHub sin cliente local** - usa API REST
-
-**Documentación detallada**: [`Docs/VersionControl-Architecture.md`](AgentWikiChat/Docs/VersionControl-Architecture.md)
-
-## 📁 Estructura del Proyecto
-
-```
-├── Configuration/     # Configuración del agente
-├── Models/            # Modelos de datos
+AgentWikiChat/
+├── Configuration/
+├── Models/
 ├── Services/
-│   ├── AI/            # Servicios de proveedores de IA
-│   ├── Database/      # Handlers de bases de datos
-│   ├── VersionControl/ # 🆕 Handlers de control de versiones (v3.5.0)
-│   │   ├── IVersionControlHandler.cs
-│   │   ├── BaseVersionControlHandler.cs
-│   │   ├── SvnVersionControlHandler.cs
-│   │   ├── GitVersionControlHandler.cs
-│   │   ├── GitHubVersionControlHandler.cs      # 🆕 v3.5.0
-│   │   └── VersionControlHandlerFactory.cs
-│   ├── Handlers/      # Handlers de herramientas
+│   ├── AI/                   # Proveedores IA (Ollama/OpenAI/LMStudio/Anthropic/Gemini)
+│   ├── Database/             # Multi-DB (SqlServer/PostgreSQL)
+│   ├── VersionControl/       # SVN/Git/GitHub + Factory
+│   ├── Handlers/             # Handlers de Tools (Wikipedia/DB/Repos/RAG)
 │   ├── AgentOrchestrator.cs
 │   ├── ReActEngine.cs
 │   ├── MemoryService.cs
 │   └── ConsoleLogger.cs
-├── Docs/              # Documentación
-│   ├── ARCHITECTURE.md
-│   ├── SqlServerTool-README.md
-│   ├── SVNTool-README.md
-│   ├── SVN-TroubleshootingGuide.md
-│   ├── VersionControl-Architecture.md    # 🆕 v3.5.0
-│   ├── VersionControl-Changelog.md       # 🆕 v3.5.0
-│   ├── VersionControl-Summary.md         # 🆕 v3.5.0
-│   └── SessionLogging-README.md
-├── Scripts/           # Scripts de utilidad y diagnóstico
-├── Logs/              # Logs de sesiones (no versionado)
-├── Program.cs         # Punto de entrada
-└── appsettings.json   # Configuración
+├── Docs/
+├── Program.cs
+└── appsettings.json
+```
+
+---
+
+## ✅ Notas y Recomendaciones
+
+- Reemplaza las API keys y credenciales de ejemplo por valores reales (OpenAI/Anthropic/Gemini, GitHub, BD).
+- BD y repositorios solo admiten operaciones de lectura por seguridad.
+- Si usas `svn_operation` o `git_operation` locales, asegúrate de tener los clientes instalados y en PATH.
+- Los modelos y endpoints pueden variar; ajusta `AI.ActiveProvider` y `Providers` según tu entorno.
+
+---
+
+## 👥 Autores
+ 
+- **Fernando Bequir** - *fernandobequir@gmail.com*
+- **Francisco Fontanini** - *fjfontanini@gmail.com*
+- **Danilo Del Collado** - *daniloddc.92@gmail.com*
+- **Francisco Troncoso** - *tonio2007@gmail.com*
+
+---
+## 📄 Licencia
+
+MIT
