@@ -63,7 +63,7 @@ public class GitHubVersionControlHandler : BaseVersionControlHandler
         LogDebug($"[GitHub] Inicializado - Owner: {_owner}, Repo: {_repo}, Branch: {_branch}");
 
         // Diagnóstico inicial
-        _ = TestConnectionAsync(); // Fire and forget
+        _ = TestConnectionAsync().Result; // Fire and forget
     }
 
     public override bool IsClientInstalled()

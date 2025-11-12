@@ -57,7 +57,7 @@ public class GitVersionControlHandler : BaseVersionControlHandler
         // Diagnóstico inicial
         if (_gitInstalled == true)
         {
-            _ = TestConnectionAsync(); // Fire and forget
+            _ = TestConnectionAsync().Result; // Fire and forget
         }
     }
 
