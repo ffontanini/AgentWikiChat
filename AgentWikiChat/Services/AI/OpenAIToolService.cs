@@ -79,10 +79,36 @@ public class OpenAIToolService : IToolCallingService
         IEnumerable<Message> context,
         CancellationToken cancellationToken = default)
     {
-        var messages = context.Select(m => new OpenAIMessage
+        var messages = context.Select(m =>
         {
-            Role = m.Role,
-            Content = m.Content
+            var openAiMsg = new OpenAIMessage
+            {
+                Role = m.Role,
+                Content = m.Content
+            };
+
+            // Si es un mensaje de tool, incluir el tool_call_id
+            if (m.Role == "tool" && !string.IsNullOrEmpty(m.ToolCallId))
+            {
+                openAiMsg.ToolCallId = m.ToolCallId;
+            }
+
+            // Si es un mensaje del assistant con tool_calls, incluir los tool_calls
+            if (m.Role == "assistant" && m.ToolCalls != null && m.ToolCalls.Any())
+            {
+                openAiMsg.ToolCalls = m.ToolCalls.Select(tc => new OpenAIToolCall
+                {
+                    Id = tc.Id,
+                    Type = tc.Type,
+                    Function = new OpenAIToolCallFunction
+                    {
+                        Name = tc.Function.Name,
+                        Arguments = tc.Function.GetArgumentsAsString()
+                    }
+                }).ToList();
+            }
+
+            return openAiMsg;
         }).ToList();
 
         messages.Add(new OpenAIMessage { Role = "user", Content = message });
@@ -96,7 +122,7 @@ public class OpenAIToolService : IToolCallingService
             MaxTokens = _maxTokens
         };
 
-        var response = await _httpClient.PostAsJsonAsync("v1/chat/completions", request, cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync("/v1/chat/completions", request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -220,6 +246,10 @@ internal class OpenAIMessage
     [JsonPropertyName("tool_calls")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<OpenAIToolCall>? ToolCalls { get; set; }
+
+    [JsonPropertyName("tool_call_id")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? ToolCallId { get; set; }
 }
 
 internal class OpenAITool

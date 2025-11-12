@@ -90,6 +90,12 @@ public class ReActEngine
                 }
 
                 // Caso 2: El LLM invocó herramientas
+                // Primero, agregar el mensaje del assistant con tool_calls al contexto
+                if (response.ToolCalls != null && response.ToolCalls.Any())
+                {
+                    currentContext.Add(new Message("assistant", response.Content ?? string.Empty, response.ToolCalls));
+                }
+
                 foreach (var toolCall in response.ToolCalls!)
                 {
                     step.ActionTool = toolCall.Function.Name;
@@ -142,7 +148,7 @@ public class ReActEngine
                     LogObservation($"???  Observación: {TruncateForDisplay(observation, 500)}");
 
                     // Agregar la observación al contexto con instrucciones claras para el LLM
-                    currentContext.Add(new Message("tool", observation));
+                    currentContext.Add(new Message("tool", observation, toolCall.Id));
 
                     // Agregar instrucción explícita para que el LLM responda
                     if (iteration == 1)
